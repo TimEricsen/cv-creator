@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    volumes:
+      - .:/src
+    ports:
+      - 80
+    command:
+      sh -c 'python -m app.api'
+
+  rabbit:
+    image:
+      rabbitmq:3.10.7-management
+    hostname:
+      myrabbithostname
+    restart:
+      always
+    ports:
+      - 15672:15672
+    depends_on:
+      - app
+
+  consumer:
+    build: .
+    volumes:
+      - .:/src
+    restart:
+      on-failure
+    command:
+      sh -c 'python -m rmq_consumer.main'
+    depends_on:
+      - app
+      - rabbit
